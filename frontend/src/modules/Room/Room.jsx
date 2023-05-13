@@ -65,9 +65,9 @@ const Room = () => {
 
         // toast
         if (Object.keys(roomData).length === 0)
-            toast.success(`Successfully created the room!`)
+            toast.success(`Created the room!`)
         else
-            toast.success(`Joined the conversation successfully!`)
+            toast.success(`Joined the room!`)
 
     }, [socket, myStream])
 
@@ -160,7 +160,7 @@ const Room = () => {
                 // styling
                 videoContainerRef.current.querySelector('#nameMine').classList.toggle(styles.display);
                 socket.emit('mute', { enabledObj: newState })
-                toast.success(`Successfully turn ${newState.video ? 'on' : 'off'} the camera!`)
+                toast.success(`Turned ${newState.video ? 'on' : 'off'} the camera!`)
             })
         else if (!isVideo)
             setEnabledObj(prev => ({
@@ -179,7 +179,7 @@ const Room = () => {
                 }
 
                 socket.emit('mute', { enabledObj: newState })
-                toast.success(`Successfully turn ${newState.audio ? 'on' : 'off'} the mic!`)
+                toast.success(`Turned ${newState.audio ? 'on' : 'off'} the mic!`)
             })
         else
             toast.error("To turn off camera, stop the screen sharing first!");
@@ -197,7 +197,7 @@ const Room = () => {
         }
         setConnections({});
         navigate('/')
-        toast.success("Successfully leave the room!");
+        toast.success("Leave the room!");
     }
 
     const messageSendHandler = (e) => {
@@ -251,7 +251,7 @@ const Room = () => {
                     setIsScreenSharing(false);
                     // to share screen to new user
                     setMyScreenTrack(null);
-                    toast.success("Successfully stop screen sharing!");
+                    toast.success("Stop screen sharing!");
                 }
 
                 // change local stream to capture stream
@@ -261,7 +261,7 @@ const Room = () => {
                 setIsScreenSharing(true);
                 // to share screen to new user
                 setMyScreenTrack(screenTrack);
-                toast.success("Successfully start screen sharing!");
+                toast.success("Start screen sharing!");
             } catch (err) {
                 toast.error("This permission is required for screen sharing!");
                 setIsScreenSharing(false);
@@ -280,15 +280,11 @@ const Room = () => {
             setIsScreenSharing(false);
             // to share screen to new user
             setMyScreenTrack(null);
-            toast.success("Successfully stop screen sharing!");
-        }
-        // run if camera is off
-        else if (!isScreenSharing) {
-            toast.error("Please turn on camera to start screen sharing!");
+            toast.success("Stop screen sharing!");
         }
         // run if camera is off
         else {
-            toast.error("Please turn on camera to stop screen sharing!");
+            toast.error(`Please turn on camera to ${isScreenSharing ? 'stop' : 'start'} screen sharing!`);
         }
     };
 

@@ -22,7 +22,7 @@ export const loginWithGoogle = async () => {
       })
     );
     redirect("/");
-    toast.success("Successfully login with google!");
+    toast.success("Login with google!");
   } catch (error) {
     toast.error("Something went wrong. Please try again!");
   }
@@ -32,7 +32,7 @@ export const logoutFromGoogle = async () => {
   try {
     await signOut(auth);
     dispatch(logoutUser());
-    toast.success("Successfully logged out!");
+    toast.success("Logged out!");
     redirect("/signin");
   } catch (error) {
     toast.error("Something went wrong. Please try again!");
