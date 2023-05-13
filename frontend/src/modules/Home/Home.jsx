@@ -7,6 +7,8 @@ import { IconButton } from '../../components';
 import { IoIosMenu } from 'react-icons/io'
 import { useClickOutside } from '../../hooks';
 import { logoutFromGoogle } from '../../firebase';
+import { toast } from 'react-toastify';
+import { genUniqueId } from '../../utils';
 
 const Home = () => {
     const [room, setRoom] = useState('')
@@ -17,9 +19,17 @@ const Home = () => {
     const menuRef = useRef(null);
     const handleSubmit = (e) => {
         e.preventDefault();
-        dispatch(setUser({ ...user, room }))
-        navigate('/room/' + room);
+        if (room.startsWith(window.location.origin) && room.split('/')[4]) {
+            dispatch(setUser({ ...user, room: room.split('/')[4] }))
+            navigate("/room/" + room.split('/')[4]);
+        } else if (!room.startsWith('http')) {
+            dispatch(setUser({ ...user, room }))
+            navigate('/room/' + room);
+        } else {
+            toast.error("Enter a valid room code or link!");
+        }
     }
+
 
     useClickOutside(menuRef, () => {
         setIsMenuOpen(false);
@@ -34,8 +44,9 @@ const Home = () => {
             </div>
             <div className={styles.center}>
                 <form onSubmit={handleSubmit} action="#" className={styles.container}>
-                    <input value={room} onChange={(e) => setRoom(e.target.value)} type="text" name="room" placeholder='Room Name' required />
-                    <input type="submit" value="Enter" />
+                    <input value={room} onChange={(e) => setRoom(e.target.value)} type="text" name="room" placeholder='Enter a code or link' required />
+                    <input type="submit" value="Join " />
+                    <input onClick={e => navigate(`/room/${genUniqueId()}`)} type='button' value="Start an instant meeting" />
                 </form>
             </div>
         </>

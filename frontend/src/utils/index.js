@@ -6,3 +6,5 @@ export {
   setLocalStorage,
   getLocalStorage,
 } from "./localStorage";
+
+export { default as genUniqueId } from "./genUniqueId";

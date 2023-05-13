@@ -82,6 +82,20 @@
           opacity: 0.7;
         }
       }
+
+      &[type="button"] {
+        @include center();
+        gap: 1.6rem;
+        background-color: $light;
+        color: $dark;
+        @include shadow($shadow-color);
+        cursor: pointer;
+        @include border($light);
+
+        &:hover {
+          opacity: 0.7;
+        }
+      }
     }
   }
 }
