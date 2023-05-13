@@ -1,0 +1,118 @@
+@import "../../styles";
+
+.wrapper {
+  @include center();
+  min-height: 100vh;
+
+  & > .container {
+    background-color: $light;
+    @include radius(1rem);
+    padding: 5rem;
+    width: 95vw;
+    max-width: 50rem;
+    @include scaleYAnimation(0.2s);
+
+    & > h1 {
+      @include font(3rem, 600);
+      @include text($dark, center);
+      margin-bottom: 3rem;
+    }
+
+    & > form {
+      @include flex(column, stretch, flex-start, 1.6rem);
+      margin-bottom: 1.6rem;
+      & > input {
+        @include border($light-gray);
+        padding: 1.2rem 2.4rem;
+        @include radius(0.5rem);
+        outline: none;
+        color: $link;
+        background-color: $light;
+        &[type="file"] {
+          display: none;
+        }
+        &:hover {
+          background-color: $white;
+        }
+        &:focus {
+          @include border($link);
+          background-color: $white;
+          &::placeholder {
+            color: $link;
+          }
+        }
+      }
+
+      & > label {
+        @include flex(row, center, flex-start, 1.6rem);
+        cursor: pointer;
+        & > img {
+          @include avatar(4.4rem);
+        }
+        & > span {
+          @include border($light-gray);
+          flex: 1;
+          padding: 1.2rem 2.4rem;
+          @include radius(0.5rem);
+          @include font(1.2rem, 400);
+          outline: none;
+          color: #757575;
+          background-color: $light;
+        }
+        &:hover > span {
+          background-color: $white;
+        }
+      }
+
+      & > .error {
+        @include text($danger, center);
+        @include font(1.4rem, 500);
+        display: none;
+        &.show {
+          display: block;
+        }
+      }
+
+      & > button {
+        outline: none;
+        border: none;
+        background-color: $link;
+        padding: 1.2rem 2.4rem;
+        @include radius(0.5rem);
+        cursor: pointer;
+        @include text($light, center, uppercase);
+        @include font(1.4rem, 500);
+
+        &:hover {
+          opacity: 0.9;
+        }
+
+        &.google {
+          @include center();
+          gap: 1.6rem;
+          background-color: $light;
+          color: $dark;
+          @include shadow($shadow-color);
+
+          & > span {
+            @include center();
+            font-size: 2rem;
+          }
+        }
+      }
+    }
+
+    & > p {
+      @include text($dark, center);
+      @include font(1.2rem);
+
+      & > a {
+        @include text($link);
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}

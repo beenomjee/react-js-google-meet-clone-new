@@ -1,0 +1,237 @@
+@import "../../styles";
+
+.container {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+
+  & > .videoContainer {
+    height: 90vh;
+    background-color: $dark;
+    padding: 2rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+    @include hideScrollbar();
+
+    @include flex(row, center, center, 2rem, wrap);
+    align-content: center;
+
+    & > div {
+      flex: 1;
+      @include center();
+      position: relative;
+
+      & > video {
+        width: 100%;
+        height: auto;
+        max-height: calc(90vh - 4rem);
+        min-width: 40rem;
+        max-width: 70rem;
+        aspect-ratio: 16/9;
+        object-fit: cover;
+        object-position: center center;
+        // flip the video
+        // -webkit-transform: scaleX(-1);
+        // transform: scaleX(-1);
+      }
+
+      &.position {
+        & > video {
+          object-fit: contain;
+          max-width: unset;
+        }
+      }
+
+      & > span {
+        @include position(absolute, 50%, 50%);
+        transform: translate(-50%, -50%);
+        @include text($light-gray, $white-space: nowrap);
+        @include font(2rem);
+        z-index: 1;
+        // padding: 5rem;
+        background-color: $secondary;
+        border-radius: 50%;
+        aspect-ratio: 1/1;
+        @include center();
+        display: none;
+        height: 60%;
+
+        &.display {
+          display: flex;
+        }
+      }
+
+      & > button {
+        pointer-events: none;
+        user-select: none;
+        color: $light-gray;
+        font-size: 2.5rem;
+        @include position(absolute, 1rem);
+        z-index: 5;
+        outline: none;
+        border: none;
+        background-color: transparent;
+
+        &[display="none"] {
+          display: none;
+        }
+      }
+    }
+  }
+
+  & > .buttonContainer {
+    height: 10vh;
+    background-color: $dark;
+    border-top: 1px solid $secondary;
+    @include flex(row, center, space-between);
+
+    & > .left {
+      width: 9.5rem;
+
+      @include desktop {
+        width: 6.5rem;
+      }
+    }
+
+    & > .center {
+      @include flex(row, center, center, 1.6rem);
+
+      & > button {
+        padding: 1rem;
+        font-size: 2.5rem;
+        background-color: $secondary;
+        color: $light-gray;
+
+        &:nth-child(4) {
+          background-color: $danger;
+        }
+
+        &:hover {
+          opacity: 0.8;
+        }
+      }
+    }
+
+    & > .right {
+      padding-right: 5rem;
+
+      @include desktop {
+        padding-right: 2rem;
+      }
+
+      & > button {
+        padding: 1rem;
+        font-size: 2.5rem;
+        background-color: transparent;
+        color: $light-gray;
+        position: relative;
+
+        &:hover {
+          background-color: $secondary;
+        }
+
+        & > span {
+          @include position(absolute, 0.2rem, unset, 0.2rem);
+          display: none;
+          width: 1rem;
+          aspect-ratio: 1/1;
+          background-color: $danger;
+          @include radius(50%);
+
+          &.show {
+            display: inline-block;
+          }
+        }
+
+        & > audio {
+          display: none;
+        }
+      }
+    }
+  }
+
+  // message menu
+  & > .bgWrapper {
+    z-index: 11;
+    @include position(fixed, 0, 0, 0, 0);
+  }
+
+  & > .menu {
+    width: 40rem;
+    background-color: $dark;
+    @include shadow($shadow-color);
+    @include position(fixed, 5rem, unset, 5rem, 7vh);
+    z-index: 12;
+    @include radius(1rem);
+    padding: 2.4rem;
+    transform-origin: center bottom;
+    transform: scaleY(0);
+
+    &.open {
+      @include scaleYAnimation(0.15s);
+    }
+
+    & > .messages {
+      height: 93%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      @include hideScrollbar();
+
+      & > p {
+        background-color: $secondary;
+        max-width: 60%;
+        min-width: 30%;
+        @include font();
+        color: $light-gray;
+        @include radius(0.5rem);
+        padding: 2.1rem 0.5rem 2.1rem;
+        margin-bottom: 1rem;
+        user-select: none;
+        position: relative;
+
+        &.me {
+          margin-left: auto;
+          background-color: $success;
+        }
+
+        & > span {
+          &:nth-child(1) {
+            @include position(absolute, 0.5rem, 0.5rem);
+            opacity: 0.7;
+            font-size: 1.1rem;
+          }
+
+          &:nth-child(3) {
+            @include position(absolute, unset, unset, 0.5rem, 0.5rem);
+            opacity: 0.7;
+            font-size: 1.1rem;
+          }
+        }
+      }
+    }
+
+    & > form {
+      height: 7%;
+      position: relative;
+
+      & > input {
+        padding: 0 2.4rem;
+        width: 100%;
+        border-radius: 1rem;
+        height: 100%;
+        outline: none;
+        border: none;
+        @include font();
+      }
+
+      & > button {
+        @include position(absolute, 50%, unset, 2.4rem, unset);
+        transform: translateY(-50%);
+        @include font(2rem);
+        padding: 0rem;
+        background-color: transparent;
+        color: $dark;
+      }
+    }
+  }
+}
