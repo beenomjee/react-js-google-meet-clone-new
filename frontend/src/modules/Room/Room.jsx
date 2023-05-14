@@ -28,7 +28,8 @@ const Room = () => {
     const videoContainerRef = useRef(null);
     const [connections, setConnections] = useState({});
     const [unsetCandidates, setUnsetCandidates] = useState([]);
-    const [videoSenders, setVideoSenders] = useState([]);
+    const [videoSenders, setVideoSenders] = useState({});
+    const [mySocketId, setMySocketId] = useState(null);
     // for muting system
     const [enabledObj, setEnabledObj] = useStateWithCallback({ audio: true, video: true })
     // for message menu
@@ -53,9 +54,14 @@ const Room = () => {
         }
     }, [navigate, user.name]);
 
-    const onJoiningRoom = useCallback(async ({ roomData }) => {
+    const onJoiningRoom = useCallback(async ({ roomData, mySocketId }) => {
+        // set my socket id
+        setMySocketId(mySocketId);
+        // getting screenSharing data from room
+        const screenSharingData = roomData.screenSharingData;
+        delete roomData.screenSharingData;
         for (let socketId in roomData) {
-            const [pc, offer, myVideoSender] = await createOffer(socket, socketId, myStream, videoContainerRef.current, roomData[socketId].name);
+            const [pc, offer, myVideoSender] = await createOffer(socket, socketId, myStream, videoContainerRef.current, roomData[socketId].name, screenSharingData, styles);
             setConnections(prev => ({ ...prev, [socketId]: pc }))
             // pushing new sender to sender array
             setVideoSenders(p => ({ ...p, [socketId]: myVideoSender }));
@@ -71,8 +77,8 @@ const Room = () => {
 
     }, [socket, myStream])
 
-    const onComingOffer = useCallback(async ({ from, offer, name }) => {
-        const [pc, answer, myVideoSender] = await createAnswer(socket, from, myStream, videoContainerRef.current, offer, name);
+    const onComingOffer = useCallback(async ({ from, offer, name, screenSharingData }) => {
+        const [pc, answer, myVideoSender] = await createAnswer(socket, from, myStream, videoContainerRef.current, offer, name, screenSharingData, styles);
         setConnections(prev => ({ ...prev, [from]: pc }))
         // pushing new sender to sender array
         setVideoSenders(p => ({ ...p, [from]: myVideoSender }));
@@ -81,38 +87,44 @@ const Room = () => {
             myVideoSender.replaceTrack(myScreenTrack);
 
         // sending answer
-        socket.emit('answer', { to: from, answer, enabledObj })
+        socket.emit('answer', { to: from, answer, enabledObj: { ...enabledObj, isFirstRender: true } });
         // toast
         toast.info(`${name} joined the conversation!`)
     }, [socket, myStream, isScreenSharing, myScreenTrack, enabledObj]);
 
     // write here bcz i use this in answer coz of user mute settings
-    const onUserMute = useCallback(async ({ from, enabledObj }) => {
+    const onUserMute = useCallback(async ({ name, from, enabledObj }) => {
         // styling for video
-        if (enabledObj.video)
-            videoContainerRef.current.querySelector(`#span${from}`)?.classList.remove(styles.display);
-        else
-            videoContainerRef.current.querySelector(`#span${from}`)?.classList.add(styles.display);
-
+        if (videoContainerRef.current.querySelector(`#span${from}`) && (enabledObj.nowIsVideo || enabledObj.isFirstRender)) {
+            if (enabledObj.video) {
+                videoContainerRef.current.querySelector(`#span${from}`).classList.remove(styles.display);
+                from !== mySocketId && !enabledObj.isFirstRender && toast.info(name + ' turned on camera!');
+            } else {
+                videoContainerRef.current.querySelector(`#span${from}`).classList.add(styles.display);
+                from !== mySocketId && !enabledObj.isFirstRender && toast.info(name + ' turned off camera!');
+            }
+        }
         // styling for audio
-        if (videoContainerRef.current.querySelector(`#btn${from}1`)) {
+        if (videoContainerRef.current.querySelector(`#btn${from}1`) && (enabledObj.nowIsAudio || enabledObj.isFirstRender)) {
             if (enabledObj.audio) {
                 videoContainerRef.current.querySelector(`#btn${from}1`).style.display = "inline";
                 videoContainerRef.current.querySelector(`#btn${from}2`).style.display = "none";
+                from !== mySocketId && !enabledObj.isFirstRender && toast.info(name + ' turned on mic!');
             }
             else {
                 videoContainerRef.current.querySelector(`#btn${from}1`).style.display = "none";
                 videoContainerRef.current.querySelector(`#btn${from}2`).style.display = "inline";
+                from !== mySocketId && !enabledObj.isFirstRender && toast.info(name + ' turned off mic!');
             }
         }
-    }, [])
+    }, [mySocketId])
 
-    const onAnswer = useCallback(async ({ from, answer, enabledObj }) => {
+    const onAnswer = useCallback(async ({ from, name, answer, enabledObj }) => {
         const pc = connections[from];
         if (pc) {
             await pc.setRemoteDescription(answer);
             // also set user mute setting
-            onUserMute({ from, enabledObj });
+            onUserMute({ from, enabledObj, name, });
         } else {
             toast.error('Something went wrong!');
         }
@@ -130,7 +142,7 @@ const Room = () => {
         }
     }, [connections]);
 
-    const onUserLeave = useCallback(async ({ socketId, name }) => {
+    const onUserLeave = useCallback(async ({ socketId, name, isLeaveUserIsScreenSharer }) => {
         const pc = connections[socketId];
         // delete connection
         if (pc) {
@@ -148,21 +160,31 @@ const Room = () => {
         }
         videoContainerRef.current.querySelector(`#div${socketId}`)?.remove();
         toast.info(name + ' leave the conversation!');
+
+        // zooming out all
+        if (isLeaveUserIsScreenSharer) {
+            for (const el of Array.from(videoContainerRef.current.querySelectorAll('div'))) {
+                el.classList.remove(styles.none);
+                el.classList.remove(styles.position);
+            }
+        }
+
     }, [connections, videoSenders])
 
     const onMute = (isVideo = false) => {
-        if (isVideo && !isScreenSharing)
+        if (isVideo)
             setEnabledObj(prev => ({
                 ...prev,
                 video: !prev.video
             }), newState => {
                 myStream.getVideoTracks()[0].enabled = newState.video;
                 // styling
-                videoContainerRef.current.querySelector('#nameMine').classList.toggle(styles.display);
-                socket.emit('mute', { enabledObj: newState })
+                !isScreenSharing && videoContainerRef.current.querySelector('#nameMine').classList.toggle(styles.display);
+
+                socket.emit('mute', { enabledObj: { ...newState, nowIsVideo: true } })
                 toast.success(`Turned ${newState.video ? 'on' : 'off'} the camera!`)
             })
-        else if (!isVideo)
+        else
             setEnabledObj(prev => ({
                 ...prev,
                 audio: !prev.audio
@@ -178,14 +200,13 @@ const Room = () => {
                     videoContainerRef.current.querySelector('#btnMine2').style.display = "inline";
                 }
 
-                socket.emit('mute', { enabledObj: newState })
+                socket.emit('mute', { enabledObj: { ...newState, nowIsAudio: true } })
                 toast.success(`Turned ${newState.audio ? 'on' : 'off'} the mic!`)
             })
-        else
-            toast.error("To turn off camera, stop the screen sharing first!");
     }
 
     const onCallLeave = async () => {
+        myScreenTrack && myScreenTrack.stop();
         for (const pcId in connections) {
             const pc = connections[pcId];
             for (const sender of pc.getSenders()) {
@@ -231,8 +252,7 @@ const Room = () => {
     }, [connections])
 
     const onScreenShare = async () => {
-        // run if camera is on and screen is not already sharing
-        if (!isScreenSharing && enabledObj.video) {
+        if (!isScreenSharing) {
             try {
                 const myScreenStream = await navigator.mediaDevices.getDisplayMedia({ cursor: true });
                 const screenTrack = myScreenStream.getVideoTracks()[0];
@@ -241,17 +261,18 @@ const Room = () => {
                 }
 
                 screenTrack.onended = e => {
-                    for (const myVideoSender in videoSenders) {
-                        videoSenders[myVideoSender].replaceTrack(myStream.getVideoTracks()[0]);
-                    }
-                    // change capture stream to local stream
-                    if (videoContainerRef.current.querySelector('#mine'))
+                    if (videoContainerRef.current.querySelector('#mine')) {
                         videoContainerRef.current.querySelector('#mine').srcObject = myStream;
-                    // set screen share to change icon
+                    }
+                    for (const myVideoSender in videoSenders) {
+                        if (videoSenders[myVideoSender].transport.state !== 'closed')
+                            videoSenders[myVideoSender].replaceTrack(myStream.getVideoTracks()[0]);
+                    }
+
                     setIsScreenSharing(false);
                     // to share screen to new user
                     setMyScreenTrack(null);
-                    toast.success("Stop screen sharing!");
+                    socket.emit('user:screen:sharing:stop', { isVideoOn: enabledObj.video });
                 }
 
                 // change local stream to capture stream
@@ -261,14 +282,15 @@ const Room = () => {
                 setIsScreenSharing(true);
                 // to share screen to new user
                 setMyScreenTrack(screenTrack);
-                toast.success("Start screen sharing!");
+
+                socket.emit('user:screen:sharing', {});
             } catch (err) {
                 toast.error("This permission is required for screen sharing!");
                 setIsScreenSharing(false);
             }
         }
         // run if camera is on and screen is already sharing
-        else if (isScreenSharing && enabledObj.video) {
+        else {
             if (videoContainerRef.current.querySelector('#mine')) {
                 // stoping video sharing
                 videoContainerRef.current.querySelector('#mine').srcObject.getVideoTracks()[0].stop();
@@ -277,16 +299,70 @@ const Room = () => {
             for (const myVideoSender in videoSenders) {
                 videoSenders[myVideoSender].replaceTrack(myStream.getVideoTracks()[0]);
             }
+
             setIsScreenSharing(false);
             // to share screen to new user
             setMyScreenTrack(null);
-            toast.success("Stop screen sharing!");
-        }
-        // run if camera is off
-        else {
-            toast.error(`Please turn on camera to ${isScreenSharing ? 'stop' : 'start'} screen sharing!`);
+            socket.emit('user:screen:sharing:stop', { isVideoOn: enabledObj.video });
         }
     };
+
+    const onUserScreenSharing = useCallback(({ from, name }) => {
+        if (from === mySocketId) {
+            videoContainerRef.current.querySelector('#nameMine').classList.remove(styles.display);
+            toast.success("Start screen sharing!");
+            // zooming video
+            videoContainerRef.current.querySelector('#divMine').classList.add(styles.position)
+            for (const el of Array.from(videoContainerRef.current.querySelectorAll('div'))) {
+                if (el.id !== "divMine") {
+                    el.classList.add(styles.none)
+                }
+            }
+        } else {
+            videoContainerRef.current.querySelector(`#span${from}`)?.classList.remove(styles.display);
+            toast.info(`${name} started screen sharing!`);
+            // zooming video
+            videoContainerRef.current.querySelector(`#div${from}`).classList.add(styles.position)
+            for (const el of Array.from(videoContainerRef.current.querySelectorAll('div'))) {
+                if (el.id !== `div${from}`) {
+                    el.classList.add(styles.none)
+                }
+            }
+        }
+    }, [mySocketId]);
+
+    const onUserScreenSharingStop = useCallback(({ isVideoOn, from, name }) => {
+        if (from === mySocketId) {
+            !isVideoOn && videoContainerRef.current.querySelector('#nameMine').classList.add(styles.display);
+            toast.success("Stop screen sharing!");
+        } else {
+            toast.info(`${name} stopped screen sharing!`);
+            !isVideoOn && videoContainerRef.current.querySelector(`#span${from}`)?.classList.add(styles.display);
+        }
+
+        // zooming out all
+        for (const el of Array.from(videoContainerRef.current.querySelectorAll('div'))) {
+            el.classList.remove(styles.none);
+            el.classList.remove(styles.position);
+        }
+    }, [mySocketId]);
+
+    const onScreenShareReject = useCallback(() => {
+        console.log('calling!');
+        if (videoContainerRef.current.querySelector('#mine')) {
+            // stoping video sharing
+            videoContainerRef.current.querySelector('#mine').srcObject.getVideoTracks()[0].stop();
+            videoContainerRef.current.querySelector('#mine').srcObject = myStream;
+        }
+        for (const myVideoSender in videoSenders) {
+            videoSenders[myVideoSender].replaceTrack(myStream.getVideoTracks()[0]);
+        }
+
+        setIsScreenSharing(false);
+        // to share screen to new user
+        setMyScreenTrack(null);
+        toast.error('Someone already sharing screen!');
+    }, [myStream, videoSenders]);
 
     // 1- run first time only and set stream
     useEffect(() => {
@@ -329,6 +405,9 @@ const Room = () => {
         socket.on('user:leave', onUserLeave);
         socket.on('mute', onUserMute);
         socket.on('message', onMessage);
+        socket.on('user:screen:sharing', onUserScreenSharing);
+        socket.on('user:screen:sharing:stop', onUserScreenSharingStop);
+        socket.on('user:screen:sharing:reject', onScreenShareReject);
         return () => {
             socket.off('user:join', onJoiningRoom);
             socket.off('offer', onComingOffer)
@@ -337,8 +416,12 @@ const Room = () => {
             socket.off('user:leave', onUserLeave);
             socket.off('mute', onUserMute);
             socket.off('message', onMessage);
+            socket.off('user:screen:sharing', onUserScreenSharing);
+            socket.off('user:screen:sharing:stop', onUserScreenSharingStop);
+            socket.off('user:screen:sharing:reject', onScreenShareReject);
+
         }
-    }, [socket, onUserMute, onJoiningRoom, onComingOffer, onAnswer, onCandidate, onUserLeave, onMessage]);
+    }, [socket, onScreenShareReject, onUserScreenSharingStop, onUserScreenSharing, onUserMute, onJoiningRoom, onComingOffer, onAnswer, onCandidate, onUserLeave, onMessage]);
 
     // 5- set unset candidates
     useEffect(() => {

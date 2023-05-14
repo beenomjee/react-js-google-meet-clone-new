@@ -11,7 +11,9 @@ const setBasics = async (
   socket,
   userSocketId,
   videoContainerEl,
-  name
+  name,
+  screenSharingData,
+  styles
 ) => {
   const pc = new RTCPeerConnection(configuration);
   let myVideoSender;
@@ -58,10 +60,20 @@ const setBasics = async (
     buttonEl2.setAttribute("display", "none");
     divEl.appendChild(buttonEl1);
     divEl.appendChild(buttonEl2);
-    videoContainerEl.appendChild(divEl);
-
     // styling purpose
-    videoContainerEl.querySelector("#divMine").className = "";
+    // adding styles to div if already someone sharing screen
+    if (screenSharingData.isRunning) {
+      if (userSocketId === screenSharingData.socketId) {
+        videoContainerEl.querySelector("#divMine").classList.add(styles.none);
+        divEl.classList.add(styles.position);
+      } else {
+        divEl.classList.add(styles.none);
+      }
+    } else {
+      videoContainerEl.querySelector("#divMine").className = "";
+    }
+
+    videoContainerEl.appendChild(divEl);
   };
 
   return [pc, myVideoSender];
@@ -72,14 +84,18 @@ export const createOffer = async (
   userSocketId,
   myStream,
   videoContainerEl,
-  name
+  name,
+  screenSharingData,
+  styles
 ) => {
   const [pc, myVideoSender] = await setBasics(
     myStream,
     socket,
     userSocketId,
     videoContainerEl,
-    name
+    name,
+    screenSharingData,
+    styles
   );
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
@@ -93,14 +109,19 @@ export const createAnswer = async (
   myStream,
   videoContainerEl,
   offer,
-  name
+  name,
+  screenSharingData,
+  styles
 ) => {
+  console.log(screenSharingData);
   const [pc, myVideoSender] = await setBasics(
     myStream,
     socket,
     userSocketId,
     videoContainerEl,
-    name
+    name,
+    screenSharingData,
+    styles
   );
 
   await pc.setRemoteDescription(offer);
