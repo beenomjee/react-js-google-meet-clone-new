@@ -12,7 +12,7 @@ const signInUser = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        "http://localhost:3001/api/v1/auth/signin",
+        "https://google-meet-clone.onrender.com/api/v1/auth/signin",
         data
       );
       return response.data;
@@ -28,7 +28,7 @@ const signUpUser = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        "http://localhost:3001/api/v1/auth/signup",
+        "https://google-meet-clone.onrender.com/api/v1/auth/signup",
         data
       );
       return response.data;

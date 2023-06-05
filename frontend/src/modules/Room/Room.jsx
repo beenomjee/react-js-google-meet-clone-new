@@ -373,7 +373,7 @@ const Room = () => {
     useEffect(() => {
         if (!myStream) return;
 
-        setSocket(io('http://localhost:3001'))
+        setSocket(io('https://google-meet-clone.onrender.com'))
         return () => {
             for (let track of myStream.getTracks()) {
                 if (track.readyState === 'live') {
