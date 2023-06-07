@@ -80,6 +80,7 @@ const Room = () => {
     }, [socket, myStream])
 
     const onComingOffer = useCallback(async ({ from, offer, name, screenSharingData }) => {
+        console.log(offer);
         const [pc, answer, myVideoSender] = await createAnswer(socket, from, myStream, videoContainerRef.current, offer, name, screenSharingData, styles);
         setConnections(prev => ({ ...prev, [from]: pc }))
         // pushing new sender to sender array
@@ -91,6 +92,7 @@ const Room = () => {
         // sending answer
         console.log(`Sending answer to ${name}-${from}`);
         socket.emit('answer', { to: from, answer, enabledObj: { ...enabledObj, isFirstRender: true } });
+        console.log({ remote: pc.remoteDescription, local: pc.localDescription });
         // toast
         toast.info(`${name} joined the conversation!`)
     }, [socket, myStream, isScreenSharing, myScreenTrack, enabledObj]);
@@ -123,12 +125,14 @@ const Room = () => {
     }, [mySocketId])
 
     const onAnswer = useCallback(async ({ from, name, answer, enabledObj }) => {
+        console.log(answer);
         const pc = connections[from];
         if (pc) {
             console.log(`Setting local description for ${name}-${from}`);
             await pc.setRemoteDescription(answer);
             // also set user mute setting
             onUserMute({ from, enabledObj, name, });
+            console.log({ remote: pc.remoteDescription, local: pc.localDescription });
         } else {
             toast.error('Something went wrong!');
         }
