@@ -1,0 +1,39 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap");
+@import "./index.scss";
+
+* {
+  font-family: "Poppins", Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 62.5%;
+  @include l-desktop {
+    font-size: 57%;
+  }
+  @include desktop {
+    font-size: 52%;
+  }
+  @include tablet {
+    font-size: 47%;
+  }
+  @include mobile {
+    font-size: 42%;
+  }
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.Toastify {
+  font-size: 1.4rem;
+}

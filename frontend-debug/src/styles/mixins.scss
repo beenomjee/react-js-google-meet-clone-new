@@ -1,0 +1,228 @@
+@import "./variables.scss";
+
+// media queries
+@mixin mobile {
+  @media screen and (max-width: $mobile-breakpoint) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media screen and (max-width: $tablet-breakpoint) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media screen and (max-width: $desktop-breakpoint) {
+    @content;
+  }
+}
+@mixin l-desktop {
+  @media screen and (max-width: $l-desktop-breakpoint) {
+    @content;
+  }
+}
+
+// flex
+@mixin flex(
+  $dir: row,
+  $item: center,
+  $content: space-between,
+  $gap: 0rem,
+  $wrap: nowrap
+) {
+  display: flex;
+  flex-direction: $dir;
+  align-items: $item;
+  justify-content: $content;
+  gap: $gap;
+  flex-wrap: $wrap;
+}
+
+@mixin flex-inline(
+  $dir: row,
+  $item: center,
+  $content: space-between,
+  $gap: 0rem,
+  $wrap: nowrap
+) {
+  display: inline-flex;
+  flex-direction: $dir;
+  align-items: $item;
+  justify-content: $content;
+  gap: $gap;
+  flex-wrap: $wrap;
+}
+
+@mixin center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// font
+@mixin font(
+  $size: 1.4rem,
+  $weight: 400,
+  $line-height: 1.5,
+  $family: "Poppins" sans-serif,
+  $style: normal,
+  $variant: normal
+) {
+  font-style: $style;
+  font-variant: $variant;
+  font-weight: $weight;
+  font-size: $size;
+  line-height: $line-height;
+  font-family: $family;
+}
+
+@mixin text(
+  $color: $black,
+  $align: left,
+  $transform: none,
+  $decoration: none,
+  $white-space: normal,
+  $letter-spacing: normal,
+  $word-spacing: normal,
+  $indent: 0rem
+) {
+  color: $color;
+  text-align: $align;
+  text-decoration: $decoration;
+  text-transform: $transform;
+  text-indent: $indent;
+  letter-spacing: $letter-spacing;
+  word-spacing: $word-spacing;
+  white-space: $white-space;
+}
+
+@mixin border(
+  $color: black,
+  $width: 0.1rem,
+  $style: solid,
+  $isTop: true,
+  $isRight: true,
+  $isBottom: true,
+  $isLeft: true
+) {
+  @if ($isTop) {
+    border-top: $width $style $color;
+  }
+  @if ($isBottom) {
+    border-bottom: $width $style $color;
+  }
+  @if ($isLeft) {
+    border-left: $width $style $color;
+  }
+  @if ($isRight) {
+    border-right: $width $style $color;
+  }
+}
+
+@mixin radius(
+  $radius: 0.5rem,
+  $isTopRight: true,
+  $isBottomRight: true,
+  $isBottomLeft: true,
+  $isTopLeft: true
+) {
+  @if ($isTopRight) {
+    border-top-right-radius: $radius;
+  }
+  @if ($isBottomRight) {
+    border-bottom-right-radius: $radius;
+  }
+  @if ($isBottomLeft) {
+    border-bottom-left-radius: $radius;
+  }
+  @if ($isTopLeft) {
+    border-top-left-radius: $radius;
+  }
+}
+
+@mixin shadow(
+  $color: $black,
+  $spread: 0.2rem,
+  $blur: 0.5rem,
+  $x: 0rem,
+  $y: 0rem
+) {
+  box-shadow: $x $y $blur $spread $color;
+}
+
+@mixin table() {
+  border-collapse: collapse;
+  border-spacing: 0rem;
+  width: 100%;
+
+  & > thead > tr > th {
+    padding: 1.2rem 2.4rem;
+    white-space: nowrap;
+    text-align: left;
+    &:last-child {
+      text-align: right;
+    }
+  }
+  & > tbody > tr {
+    & > td {
+      padding: 1.2rem 2.4rem;
+      white-space: nowrap;
+      background-color: $white;
+      &:last-child {
+        text-align: right;
+      }
+    }
+  }
+}
+
+// Avatar
+@mixin avatar($width: 3rem) {
+  width: $width;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+// position
+@mixin position(
+  $position: relative,
+  $top: unset,
+  $left: unset,
+  $right: unset,
+  $bottom: unset
+) {
+  position: $position;
+  top: $top;
+  right: $right;
+  bottom: $bottom;
+  left: $left;
+}
+
+// animation
+@mixin scaleYAnimation($time) {
+  animation: scaleYAnimation $time ease-in-out 1 forwards;
+}
+@keyframes scaleYAnimation {
+  0% {
+    transform: scaley(0);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+// scrollbar
+@mixin hideScrollbar {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  & {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}

@@ -1,0 +1,16 @@
+@import "../../styles";
+
+.button {
+  cursor: pointer;
+  outline: none;
+  border: none;
+  background-color: transparent;
+  transition: background-color 0.2s;
+  padding: 0.3rem;
+  @include flex-inline(row, center, center);
+  @include radius(50%);
+
+  &:hover {
+    background-color: $light-gray;
+  }
+}

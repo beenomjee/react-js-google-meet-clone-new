@@ -1,0 +1,101 @@
+@import "../../styles";
+
+.topMenu {
+  @include position(fixed, 2rem, 3rem);
+  z-index: 5;
+  @include center();
+
+  & > button {
+    font-size: 3rem;
+  }
+
+  & > .menu {
+    @include position(absolute, calc(100%), 1rem);
+    z-index: 10;
+    background-color: $light-gray;
+    @include radius(1rem);
+    min-width: 20rem;
+    max-width: 80vw;
+    padding: 2.4rem 0;
+    transform-origin: 0 0;
+    transform: scale(0);
+    transition: transform 0.15s;
+    @include shadow($shadow-color);
+
+    &.open {
+      transform: scale(1);
+    }
+
+    & > button {
+      overflow: none;
+      border: none;
+      background-color: $light;
+      width: 100%;
+      padding: 1.2rem;
+      @include font($weight: 500);
+      text-transform: uppercase;
+      cursor: pointer;
+
+      &:hover {
+        filter: saturate(10);
+      }
+    }
+  }
+}
+
+.center {
+  min-height: 100vh;
+  @include center();
+
+  .container {
+    @include flex(column, stretch, $gap: 2rem);
+    max-width: 95vw;
+    width: 50rem;
+    padding: 5rem;
+    @include radius(2rem);
+    background-color: $light-gray;
+    @include scaleYAnimation(0.1s);
+
+    & > input {
+      padding: 1.2rem 2.4rem;
+      color: $link;
+      @include border($light);
+      outline: none;
+      @include radius(0.5rem);
+      @include font(1.6rem);
+
+      &:hover {
+        @include border($secondary);
+      }
+
+      &:focus {
+        @include border($link);
+      }
+
+      &[type="submit"] {
+        background-color: $link;
+        color: $light;
+        text-transform: uppercase;
+        cursor: pointer;
+
+        &:hover {
+          opacity: 0.7;
+        }
+      }
+
+      &[type="button"] {
+        @include center();
+        gap: 1.6rem;
+        background-color: $light;
+        color: $dark;
+        @include shadow($shadow-color);
+        cursor: pointer;
+        @include border($light);
+
+        &:hover {
+          opacity: 0.7;
+        }
+      }
+    }
+  }
+}

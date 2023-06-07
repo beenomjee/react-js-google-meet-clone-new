@@ -1,0 +1,28 @@
+// Colors
+$primary: #007bff;
+$secondary: #6c757d;
+$success: #28a745;
+$danger: #dc3545;
+$warning: #ffc107;
+$info: #17a2b8;
+$light: #f8f9fa;
+$dark: #343a40;
+$link: #007bff;
+$white: #fff;
+$black: #000;
+$light-gray: #e8e8e8;
+$shadow-color: rgba(
+  $color: $black,
+  $alpha: 0.1,
+);
+// Spacing
+$spacing: 0.4rem;
+
+// transition
+$transition-duration: 0.25s;
+
+// Breakpoints
+$mobile-breakpoint: 580px;
+$tablet-breakpoint: 800px;
+$desktop-breakpoint: 990px;
+$l-desktop-breakpoint: 1200px;
