@@ -1,0 +1,24 @@
+{
+    "routes": [
+        {
+            "src": "/audio/(.*)",
+            "dest": "audio/$1"
+        },
+        {
+            "src": "/imgs/(.*)",
+            "dest": "imgs/$1"
+        },
+        {
+            "src": "/static/(.*)",
+            "dest": "static/$1"
+        },
+        {
+            "src": "/asset-manifest.json",
+            "dest": "asset-manifest.json"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "index.html"
+        }
+    ]
+}
